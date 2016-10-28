@@ -4,12 +4,12 @@ This document describes how to serialize a filesystem and filesystem changes lik
 One or more layers are applied on top of each other to create a complete filesystem.
 This document will use a concrete example to illustrate how to create and consume these filesystem layers.
 
-This section defines the `application/vnd.oci.image.layer.v1.tar+gzip` and `application/vnd.oci.image.layer.nondistributable.v1.tar+gzip` [media types](media-types.md).
+This section defines the `application/vnd.oci.image.layer.aufs.v1.tar+gzip` and `application/vnd.oci.image.layer.nondistributable.aufs.v1.tar+gzip` [media types](media-types.md).
 
 ## Distributable Format
 
-Layer Changesets for the [mediatype](./media-types.md) `application/vnd.oci.image.layer.v1.tar+gzip` MUST be packaged in a [tar archive][tar-archive] compressed with [gzip][gzip].
-Layer Changesets for the [mediatype](./media-types.md) `application/vnd.oci.image.layer.v1.tar+gzip` MUST NOT include duplicate entries for file paths in the resulting [tar archive][tar-archive].
+Layer Changesets for the [mediatype](./media-types.md) `application/vnd.oci.image.layer.aufs.v1.tar+gzip` MUST be packaged in a [tar archive][tar-archive] compressed with [gzip][gzip].
+Layer Changesets for the [mediatype](./media-types.md) `application/vnd.oci.image.layer.aufs.v1.tar+gzip` MUST NOT include duplicate entries for file paths in the resulting [tar archive][tar-archive].
 
 ## Change Types
 
@@ -21,7 +21,7 @@ Types of changes that can occur in a changeset are:
 
 Additions and Modifications are represented the same in the changeset tar archive.
 
-Removals are represented using "[whiteout](#whiteouts)" file entries (See [Representing Changes](#representing-changes)).
+Removals are represented using "[whiteout](#aufs-whiteouts)" file entries (See [Representing Changes](#representing-changes)).
 
 ### File Types
 
@@ -193,7 +193,7 @@ This reflects the removal of `/etc/my-app-config` and creation of a file and dir
 A [tar archive][tar-archive] is then created which contains *only* this changeset:
 
 - Added and modified files and directories in their entirety
-- Deleted files or directories marked with a [whiteout file](#whiteouts)
+- Deleted files or directories marked with a [whiteout file](#aufs-whiteouts)
 
 The resulting tar archive for `rootfs-c9d-v1.s1` has the following entries:
 
@@ -208,11 +208,11 @@ To signify that the resource `./etc/my-app-config` MUST be removed when the chan
 
 ## Applying Changesets
 
-Layer Changesets of [mediatype](./media-types.md) `application/vnd.oci.image.layer.v1.tar+gzip` are _applied_, rather than simply extracted as tar archives.
+Layer Changesets of [mediatype](./media-types.md) `application/vnd.oci.image.layer.aufs.v1.tar+gzip` are _applied_, rather than simply extracted as tar archives.
 
-Applying a layer changeset requires special consideration for the [whiteout](#whiteouts) files.
+Applying a layer changeset requires special consideration for the [whiteout](#aufs-whiteouts) files.
 
-In the absence of any [whiteout](#whiteouts) files in a layer changeset, the archive is extracted like a regular tar archive.
+In the absence of any [whiteout](#aufs-whiteouts) files in a layer changeset, the archive is extracted like a regular tar archive.
 
 ### Changeset over existing files
 
@@ -223,9 +223,10 @@ In all other cases, the implementation MUST do the semantic equivalent of the fo
 - removing the file path (e.g. [`unlink(2)`](http://linux.die.net/man/2/unlink) on Linux systems)
 - recreating the file path, based on the contents and attributes of the changeset entry
 
-## Whiteouts
+## AUFS Whiteouts
 
 A whiteout file is an empty file with a special filename that signifies a path should be deleted.
+This approach originated from the [AUFS](https://en.wikipedia.org/wiki/Aufs) union filesystem.
 A whiteout filename consists of the prefix `.wh.` plus the basename of the path to be deleted.
 As files prefixed with `.wh.` are special whiteout markers, it is not possible to create a filesystem which has a file or directory with a name beginning with `.wh.`.
 
@@ -311,7 +312,7 @@ Any given image is likely to be composed of several of these Image Filesystem Ch
 Certain layers, due to legal requirements, may not be regularly distributable.
 Typically, such layers are downloaded directly from a distributor but are never uploaded.
 
-Layers that have these restrictions SHOULD be tagged with an alternative mediatype of `application/vnd.oci.image.layer.nondistributable.v1.tar+gzip`.
+Layers that have these restrictions SHOULD be tagged with an alternative mediatype of `application/vnd.oci.image.layer.nondistributable.aufs.v1.tar+gzip`.
 [Descriptors](descriptor.md) referencing these layers MAY include `urls` for downloading these layers.
 It is implementation-defined whether or not implementations upload layers tagged with this media type.
 

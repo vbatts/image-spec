@@ -6,8 +6,8 @@ The following media types identify the formats described here and their referenc
 - `application/vnd.oci.image.manifest.list.v1+json`: [Manifest list](manifest-list.md#manifest-list)
 - `application/vnd.oci.image.manifest.v1+json`: [Image manifest](manifest.md#image-manifest)
 - `application/vnd.oci.image.config.v1+json`: [Image config](config.md)
-- `application/vnd.oci.image.layer.v1.tar+gzip`: ["Layer", as a gzipped tar archive](layer.md)
-- `application/vnd.oci.image.layer.nondistributable.v1.tar+gzip`: ["Layer", as a gzipped tar archive with distribution restrictions](layer.md#non-distributable-layers)
+- `application/vnd.oci.image.layer.aufs.v1.tar+gzip`: ["Layer", as a gzipped tar archive](layer.md)
+- `application/vnd.oci.image.layer.nondistributable.aufs.v1.tar+gzip`: ["Layer", as a gzipped tar archive with distribution restrictions](layer.md#non-distributable-layers)
 
 ## Media Type Conflicts
 
